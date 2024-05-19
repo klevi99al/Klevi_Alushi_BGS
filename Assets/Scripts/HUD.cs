@@ -15,9 +15,6 @@ public class HUD : MonoBehaviour
     [Header("Screen Transition References")]
     public Image screenTransitionImage;
     public bool shouldDoScreenTransition = false;
-
-    [SerializeField] private Texture2D activeCursor;
-
     private float currentAlpha = 0f;
     private float desiredAlpha = 1f;
     private bool isTransitioningIn = false;
@@ -30,6 +27,8 @@ public class HUD : MonoBehaviour
     private bool delayFinished = false;
     private bool fadeInFinished = false;
 
+    [Header("Cursor")]
+    [SerializeField] private Texture2D activeCursor;
 
     public static HUD Instance;
     public bool shouldSetHintstring = false;
@@ -46,9 +45,9 @@ public class HUD : MonoBehaviour
         }
     }
 
-    private void Start()
+    public void SetCursor(bool activeObject = false)
     {
-        Cursor.SetCursor(activeCursor, new(activeCursor.width / 2, activeCursor.height / 2), CursorMode.Auto);
+        Cursor.SetCursor(activeObject == false ? null : activeCursor, new(activeCursor.width / 2, activeCursor.height / 2), CursorMode.Auto);
     }
 
     private void Update()
