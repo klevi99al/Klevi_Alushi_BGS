@@ -27,8 +27,9 @@ public class HUD : MonoBehaviour
     private bool delayFinished = false;
     private bool fadeInFinished = false;
 
-    [Header("Cursor")]
+    [Header("UI and Cursor")]
     [SerializeField] private Texture2D activeCursor;
+    [SerializeField] private TMP_Text playerMoneyText;
 
     public static HUD Instance;
     public bool shouldSetHintstring = false;
@@ -43,6 +44,16 @@ public class HUD : MonoBehaviour
         {
             Instance = this;
         }
+    }
+
+    public void UpdatePlayerMoneyHUD(float money)
+    {
+        if(money < 0f)
+        {
+            money = 0f;
+        }
+
+        playerMoneyText.text = money.ToString();
     }
 
     public void SetCursor(bool activeObject = false)
@@ -143,11 +154,11 @@ public class HUD : MonoBehaviour
 
 
 
-    public void MakeScreenTransition()
+    public void MakeScreenTransition(float waitTime)
     {
         if (!shouldDoScreenTransition)
         {
-            duration = 0;
+            duration = waitTime;
             transitionDone = false;
             shouldDoScreenTransition = true;
             desiredAlpha = 1;

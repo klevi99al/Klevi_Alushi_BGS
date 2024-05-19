@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
-    private bool activated = false;
-    [SerializeField] private GameObject destination;
+    [SerializeField] private Transform destination;
     [SerializeField] private AudioSource source;
     [SerializeField] private AudioClip sound;
+    [SerializeField] private LevelManager levelManager;
+
 
     private void OnMouseEnter()
     {
@@ -21,6 +22,12 @@ public class Door : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Debug.Log("Clicked");
+        if(source != null && sound != null)
+        {
+            source.PlayOneShot(sound);
+        }
+
+        HUD.Instance.MakeScreenTransition(2);
+        levelManager.player.GetComponent<PlayerUtils>().TeleportPlayer(destination.position, 2);
     }
 }
