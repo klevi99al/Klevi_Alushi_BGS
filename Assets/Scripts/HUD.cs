@@ -1,6 +1,8 @@
 using TMPro;
-using UnityEditor.Rendering;
+using UnityEngine.UI;
 using UnityEngine;
+using System.Collections;
+using System.Threading;
 
 public class HUD : MonoBehaviour
 {
@@ -9,6 +11,25 @@ public class HUD : MonoBehaviour
     public RectTransform dialogueImage;
     public float dialogueWindowScaleSpeed = 5f;
     public float hintStringWindowMaxScale = 400;
+
+    [Header("Screen Transition References")]
+    public Image screenTransitionImage;
+    public bool shouldDoScreenTransition = false;
+
+    [SerializeField] private Texture2D activeCursor;
+
+    private float currentAlpha = 0f;
+    private float desiredAlpha = 1f;
+    private bool isTransitioningIn = false;
+    private bool isTransitioningOut = false;
+    public bool transitionDone = false;
+    private float fadeInDuration = 0.5f;
+    private float fadeOutDuration = 0.5f;
+    private float duration;
+    private float delayTimer = 0f;
+    private bool delayFinished = false;
+    private bool fadeInFinished = false;
+
 
     public static HUD Instance;
     public bool shouldSetHintstring = false;
@@ -25,23 +46,115 @@ public class HUD : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        Cursor.SetCursor(activeCursor, new(activeCursor.width / 2, activeCursor.height / 2), CursorMode.Auto);
+    }
+
     private void Update()
     {
         if (shouldSetHintstring)
         {
-            Vector2 finalSizeDelta = dialogueImage.sizeDelta + new Vector2(0, hintStringWindowMaxScale);
+            DoDialogueWindowTransition();
+        }
 
-            dialogueImage.sizeDelta = Vector2.MoveTowards(dialogueImage.sizeDelta, finalSizeDelta, dialogueWindowScaleSpeed * Time.deltaTime);
+        if (shouldDoScreenTransition && !transitionDone)
+        {
+            DoScreenTransition();
+        }
+    }
 
-            if (dialogueImage.sizeDelta.y >= hintStringWindowMaxScale)
+    private void DoDialogueWindowTransition()
+    {
+        Vector2 finalSizeDelta = dialogueImage.sizeDelta + new Vector2(0, hintStringWindowMaxScale);
+
+        dialogueImage.sizeDelta = Vector2.MoveTowards(dialogueImage.sizeDelta, finalSizeDelta, dialogueWindowScaleSpeed * Time.deltaTime);
+
+        if (dialogueImage.sizeDelta.y >= hintStringWindowMaxScale)
+        {
+            dialogueImage.sizeDelta = new Vector2(dialogueImage.sizeDelta.x, hintStringWindowMaxScale);
+            dialogueText.gameObject.SetActive(true);
+            shouldSetHintstring = false;
+        }
+    }
+
+    private void DoScreenTransition()
+    {
+        if (!fadeInFinished)
+        {
+            transitionDone = false;
+
+            if (!isTransitioningIn && !isTransitioningOut)
             {
-                dialogueImage.sizeDelta = new Vector2(dialogueImage.sizeDelta.x, hintStringWindowMaxScale);
-                dialogueText.gameObject.SetActive(true);
-                shouldSetHintstring = false;
+                isTransitioningIn = true;
+                desiredAlpha = 1.0f;
+            }
+
+            currentAlpha = Mathf.MoveTowards(currentAlpha, desiredAlpha, Time.deltaTime / fadeInDuration);
+            Color color = screenTransitionImage.color;
+            color.a = currentAlpha;
+            screenTransitionImage.color = color;
+
+            if (currentAlpha == desiredAlpha)
+            {
+                fadeInFinished = true;
+            }
+        }
+        else if (!delayFinished)
+        {
+            delayTimer += Time.deltaTime;
+
+            if (delayTimer >= duration)
+            {
+                delayFinished = true;
+                delayTimer = 0f;
+
+                isTransitioningOut = true;
+                desiredAlpha = 0.0f;
+            }
+        }
+        else
+        {
+            currentAlpha = Mathf.MoveTowards(currentAlpha, desiredAlpha, Time.deltaTime / fadeOutDuration);
+            Color color = screenTransitionImage.color;
+            color.a = currentAlpha;
+            screenTransitionImage.color = color;
+
+            if (currentAlpha == desiredAlpha)
+            {
+                ResetScreenTransitionVariables();
             }
         }
     }
 
+    private void ResetScreenTransitionVariables()
+    {
+        currentAlpha = 0f;
+        desiredAlpha = 1f;
+        isTransitioningIn = false;
+        isTransitioningOut = false;
+        transitionDone = false;
+        fadeInFinished = false;
+        delayTimer = 0f;
+        delayFinished = false;
+        shouldDoScreenTransition = false;
+        screenTransitionImage.gameObject.SetActive(false);
+    }
+
+
+
+
+    public void MakeScreenTransition()
+    {
+        if (!shouldDoScreenTransition)
+        {
+            duration = 0;
+            transitionDone = false;
+            shouldDoScreenTransition = true;
+            desiredAlpha = 1;
+            screenTransitionImage.gameObject.SetActive(true);
+        }
+    }
 
     public void SetHintString(string hint)
     {

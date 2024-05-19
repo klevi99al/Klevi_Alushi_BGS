@@ -4,6 +4,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private float movementSpeed = 1f;
+    public float interactionDistance = 2f;
 
     private Vector2 input;
     private Vector2 previousInput; // we add this to also fix a small flickering issue when the rotation was being applied every frame. We update it only when changed
