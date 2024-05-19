@@ -49,7 +49,7 @@ public class PlayerUtils : MonoBehaviour
     {
         transform.position = teleportPosition;
         shouldTeleport = false;
-        hasTeleported = true;
+        hasTeleported = false;
         teleportTimer = 0f;
     }
 }

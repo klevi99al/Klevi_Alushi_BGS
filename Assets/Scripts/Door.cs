@@ -9,7 +9,6 @@ public class Door : MonoBehaviour
     [SerializeField] private AudioClip sound;
     [SerializeField] private LevelManager levelManager;
 
-
     private void OnMouseEnter()
     {
         HUD.Instance.SetCursor(true);
@@ -29,5 +28,6 @@ public class Door : MonoBehaviour
 
         HUD.Instance.MakeScreenTransition(2);
         levelManager.player.GetComponent<PlayerUtils>().TeleportPlayer(destination.position, 2);
+        levelManager.exitShop.SetActive(true);
     }
 }
