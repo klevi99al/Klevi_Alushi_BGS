@@ -1,12 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
     public int playerMoney = 1000;
+    public int maxItemsNumber = 5; // added this so i can limit the items according to the UI to avoid buying infinite items
 
-    public List<Sprite> hoodies = new();
-    public List<Sprite> torsos = new();
-    public List<Sprite> sprites = new();
+    public List<Item> hoodies = new();
+    public List<Item> torsos = new();
+    public List<Item> boots = new();
 }

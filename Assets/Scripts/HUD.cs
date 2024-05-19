@@ -1,16 +1,13 @@
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
-using System.Collections;
-using System.Threading;
+using System.Collections.Generic;
 
 public class HUD : MonoBehaviour
 {
     [Header("Dialogue Window References")]
     public TMP_Text dialogueText;
     public RectTransform dialogueImage;
-    public float dialogueWindowScaleSpeed = 5f;
-    public float hintStringWindowMaxScale = 400;
 
     [Header("Screen Transition References")]
     public Image screenTransitionImage;
@@ -30,9 +27,12 @@ public class HUD : MonoBehaviour
     [Header("UI and Cursor")]
     [SerializeField] private Texture2D activeCursor;
     [SerializeField] private TMP_Text playerMoneyText;
+    public LevelManager levelManager;
+
+    [Header("Player Inventory")]
+    [SerializeField] private Transform inventorySlots;
 
     public static HUD Instance;
-    public bool shouldSetHintstring = false;
 
     private void Awake()
     {
@@ -63,28 +63,9 @@ public class HUD : MonoBehaviour
 
     private void Update()
     {
-        if (shouldSetHintstring)
-        {
-            DoDialogueWindowTransition();
-        }
-
         if (shouldDoScreenTransition && !transitionDone)
         {
             DoScreenTransition();
-        }
-    }
-
-    private void DoDialogueWindowTransition()
-    {
-        Vector2 finalSizeDelta = dialogueImage.sizeDelta + new Vector2(0, hintStringWindowMaxScale);
-
-        dialogueImage.sizeDelta = Vector2.MoveTowards(dialogueImage.sizeDelta, finalSizeDelta, dialogueWindowScaleSpeed * Time.deltaTime);
-
-        if (dialogueImage.sizeDelta.y >= hintStringWindowMaxScale)
-        {
-            dialogueImage.sizeDelta = new Vector2(dialogueImage.sizeDelta.x, hintStringWindowMaxScale);
-            dialogueText.gameObject.SetActive(true);
-            shouldSetHintstring = false;
         }
     }
 
@@ -151,7 +132,24 @@ public class HUD : MonoBehaviour
         screenTransitionImage.gameObject.SetActive(false);
     }
 
+    public void SetPlayerItems()
+    {
+        PlayerInventory playerInventory = levelManager.playerInventory;
+        SpawnItems(playerInventory.hoodies, 0);
+        SpawnItems(playerInventory.torsos, 1);
+        SpawnItems(playerInventory.boots, 2);
+    }
 
+    private void SpawnItems(List<Item> items, int index)
+    {
+        for(int i = 0; i < items.Count; i++)
+        {
+            Image image = inventorySlots.transform.GetChild(index).GetChild(i).GetChild(0).GetComponent<Image>();
+            image.GetComponentInParent<EquipItem>().item = items[i];
+            image.color = Color.white;
+            image.sprite = items[i].itemIcon;
+        }
+    }
 
 
     public void MakeScreenTransition(float waitTime)
@@ -164,19 +162,5 @@ public class HUD : MonoBehaviour
             desiredAlpha = 1;
             screenTransitionImage.gameObject.SetActive(true);
         }
-    }
-
-    public void SetHintString(string hint)
-    {
-        dialogueText.text = hint;
-        shouldSetHintstring = true;
-    }
-
-    public void CloseHintString()
-    {
-        dialogueText.text = string.Empty;
-        dialogueText.gameObject.SetActive(false);
-        shouldSetHintstring = false;
-        dialogueImage.sizeDelta = new Vector2(dialogueImage.sizeDelta.x, 0);
     }
 }

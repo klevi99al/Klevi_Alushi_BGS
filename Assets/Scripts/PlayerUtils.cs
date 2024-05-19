@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class PlayerUtils : MonoBehaviour
@@ -10,11 +7,17 @@ public class PlayerUtils : MonoBehaviour
     private bool shouldTeleport = false;
     private bool hasTeleported = false;
 
+    [Header("Body Parts")]
+    public SpriteRenderer hoodie;
+    public SpriteRenderer torso;
+    public SpriteRenderer legRight;
+    public SpriteRenderer legLeft;
+
     private Vector2 teleportPosition;
     private float waitTime;
     private float teleportTimer;
 
-    private int maxPlayerMoney = 10000;
+    private readonly int maxPlayerMoney = 10000;
 
     private void Update()
     {
