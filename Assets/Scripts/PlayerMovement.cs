@@ -4,25 +4,36 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private float movementSpeed = 1f;
-    [SerializeField] private Rigidbody2D rb;
-    [SerializeField] private Animator animator;
 
-    private PlayerInputActions playerInputActions;
     private Vector2 input;
+    private Vector2 previousInput; // we add this to also fix a small flickering issue when the rotation was being applied every frame. We update it only when changed
+
+    private Rigidbody2D rb;
+    private Animator animator;
+    private PlayerInputActions playerInputActions;
+    
+
     private int isWalkingHash;
 
     private void Awake()
     {
         playerInputActions = new();
         playerInputActions.Player.Enable();
+
+        rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+
         isWalkingHash = Animator.StringToHash("IsWalking");
     }
 
     private void Update()
     {
         input = playerInputActions.Player.Movement.ReadValue<Vector2>();
-        HandleRotation();
+        
+        HandleRotation(input);
         HandleAnimations();
+        
+        previousInput = input;
     }
 
     private void FixedUpdate()
@@ -35,10 +46,13 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = input * movementSpeed;
     }
 
-    private void HandleRotation()
+    private void HandleRotation(Vector2 input)
     {
-        if (input.x > 0) transform.eulerAngles = Vector2.zero;
-        else if (input.x < 0) transform.eulerAngles = new(0, 180);
+        if (input != previousInput)
+        {
+            if (input.x > 0) transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            else if (input.x < 0) transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        }
     }
 
     private void HandleAnimations()
